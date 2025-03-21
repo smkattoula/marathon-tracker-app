@@ -1,9 +1,13 @@
 import { Request, Response } from "express";
 import { IUser } from "../models/userModel";
 
+
+
 // Handle OAuth Success
 export const handleOAuthSuccess = (req: Request, res: Response) => {
   res.json({ success: true, user: req.user });
+  res.redirect('myapp://auth')
+  console.log("handleOAuthSuccess called");
 };
 
 // Get User Profile (Session Check)

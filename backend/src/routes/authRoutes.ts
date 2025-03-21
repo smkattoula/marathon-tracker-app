@@ -6,6 +6,7 @@ import {
   handleOAuthSuccess,
 } from "../controllers/authController";
 
+const API_URL = 'http://localhost:5001';
 const router = express.Router();
 
 // Login Route (Redirect to Google OAuth)
@@ -18,6 +19,7 @@ router.get(
 router.get(
   "/google/callback",
   passport.authenticate("google", { failureRedirect: "/" }),
+  // handleOAuthSuccess
   handleOAuthSuccess
 );
 

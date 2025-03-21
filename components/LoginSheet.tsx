@@ -1,4 +1,4 @@
-import React from "react";
+import {useEffect} from "react";
 import { View } from "react-native";
 import { Text } from "@/components/ui/text";
 import { Button, ButtonText } from "@/components/ui/button";
@@ -17,6 +17,7 @@ type LoginSheetProps = {
 };
 
 const LoginSheet = ({ isOpen, onClose }: LoginSheetProps): JSX.Element => {
+
   return (
     <Actionsheet isOpen={isOpen} onClose={onClose}>
       <ActionsheetBackdrop />
@@ -27,7 +28,7 @@ const LoginSheet = ({ isOpen, onClose }: LoginSheetProps): JSX.Element => {
 
         <View style={{ padding: 16, width: "100%" }}>
           <Text size="xl" bold style={{ marginBottom: 16 }}>
-            Sign In
+            Sign In With Google
           </Text>
           <Input style={{ marginBottom: 16 }}>
             <InputField placeholder="Username" />
