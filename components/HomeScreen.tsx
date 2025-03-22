@@ -7,8 +7,9 @@ import { MenuIcon } from "@/components/ui/icon";
 import { NativeStackNavigationProp} from "@react-navigation/native-stack";
 import { RootStackParamList } from "@/navigation/types";
 import { useNavigation } from "@react-navigation/native";
-import { Linking } from "react-native";
 import axios from "axios";
+import {router } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Login'>;
 export default function HomeScreen() {
@@ -21,17 +22,12 @@ export default function HomeScreen() {
     
     const handleLogout = async () => {
       try {
-        
+        await AsyncStorage.removeItem("userToken");
         await axios.get(`${API_URL}/auth/logout`, {
           withCredentials: true,
         });
-        navigation.reset({
-          index: 0,
-          routes: [{ name: "Login" }],
-        });
-        console.log("User logged out");
-        // Optionally navigate to login screen
-        navigation.navigate("Login");
+        router.replace("/login");
+        console.log("Logout successful!");
       } catch (error) {
         console.error("Logout failed:", error);
       }
