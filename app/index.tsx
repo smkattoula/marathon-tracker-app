@@ -2,25 +2,26 @@ import React, { useEffect, useState } from "react";
 import { View, ActivityIndicator } from "react-native";
 import { Redirect } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import authService from "@/services/AuthService";
 
 export default function Index() {
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    // Check if user is logged in
-    const checkAuth = async () => {
+    const verifyAuth = async () => {
       try {
-        const token = await AsyncStorage.getItem("userToken");
-        setIsAuthenticated(token !== null);
+        const {isAuthenticated} = await authService.checkAuthStatus();
+        setIsAuthenticated(isAuthenticated);
       } catch (error) {
         console.error("Error checking auth status:", error);
+        setIsAuthenticated(false);
       } finally {
         setIsLoading(false);
       }
     };
-
-    checkAuth();
+    
+    verifyAuth();
   }, []);
 
   // Show a loading indicator while checking auth status

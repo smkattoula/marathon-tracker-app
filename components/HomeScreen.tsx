@@ -4,17 +4,21 @@ import { Text } from "@/components/ui/text";
 import { Button, ButtonText, ButtonIcon } from "@/components/ui/button";
 import { Menu, MenuItem, MenuItemLabel } from "@/components/ui/menu";
 import { MenuIcon } from "@/components/ui/icon";
-import { NativeStackNavigationProp} from "@react-navigation/native-stack";
-import { RootStackParamList } from "@/navigation/types";
-import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import {router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Login'>;
-export default function HomeScreen() {
 
-  const navigation = useNavigation<HomeScreenNavigationProp>();
+interface HomeScreenProps {
+  user?: {
+    id: string;
+    email: string;
+    name: string; 
+  } | null;
+}
+
+export default function HomeScreen({ user }: HomeScreenProps) {
+
   const [menuOpen, setMenuOpen] = React.useState(false);
 
   
@@ -22,14 +26,20 @@ export default function HomeScreen() {
     
     const handleLogout = async () => {
       try {
-        await AsyncStorage.removeItem("userToken");
         await axios.get(`${API_URL}/auth/logout`, {
           withCredentials: true,
         });
+        await AsyncStorage.removeItem("userToken");
+        // setUser(null) right here??
+
         router.replace("/login");
         console.log("Logout successful!");
       } catch (error) {
+        // Even if the backend call fails, we should still clear local storage and redirect
+        // This ensures the user can still "log out" on the frontend
         console.error("Logout failed:", error);
+        await AsyncStorage.removeItem("userToken");
+        router.replace("/login");
       }
     };
 
