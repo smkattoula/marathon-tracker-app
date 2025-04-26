@@ -1,16 +1,14 @@
 import axios from 'axios';
 import * as WebBrowser from 'expo-web-browser';
-import { useNavigation } from '@react-navigation/native';
-import * as Google from 'expo-auth-session/providers/google';
 import * as AuthSession from 'expo-auth-session';
-import Constants from 'expo-constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Error } from 'mongoose';
+import ConfigService from './ConfigService';
 
-const API_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:5001";
-const CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID || "469869191343-3q7dgv3c0qaf2ptngfgdvanvkbqv18nc.apps.googleusercontent.com";
-const appSlug = Constants.expoConfig?.slug;
-const username = Constants.expoConfig?.owner;
-const REDIRECT_URI = `https://auth.expo.io/@${username}/${appSlug}`
+// Get configuration from ConfigService
+const API_URL = ConfigService.api.backendUrl;
+const CLIENT_ID = ConfigService.auth.google.webClientId;
+const REDIRECT_URI = ConfigService.auth.google.redirectUri;
 
 const api = axios.create({
   baseURL: API_URL,
@@ -19,14 +17,11 @@ const api = axios.create({
 
 let authInstance = null;
 const authService = {
-
     initGoogle: () => {
       WebBrowser.maybeCompleteAuthSession();
     },
 
     handleGoogleLogin: async () => {
-     
-      
       try {
         const discovery = await AuthSession.fetchDiscoveryAsync(
           'https://accounts.google.com'
@@ -53,6 +48,7 @@ const authService = {
         return { success: false };
       }
     },
+    
     logout: async () => {
       try {
         authInstance = null;
@@ -106,9 +102,41 @@ const authService = {
         await AsyncStorage.removeItem('userToken');
         return { isAuthenticated: false, user: null };
       }
+    },
+
+    // Update user profile
+    updateUserProfile: async (profileData : any) => {
+      try {
+        // Get token from AsyncStorage
+        const token = await AsyncStorage.getItem('userToken');
+        
+        if (!token) {
+          return { success: false, error: 'Not authenticated' };
+        }
+        
+        // Set up request config
+        const config = {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        };
+        
+        // Make API request
+        const response = await api.put('/auth/update-profile', profileData, config);
+        
+        if (response.data.success) {
+          return { 
+            success: true, 
+            user: response.data.user 
+          };
+        } else {
+          return { success: false, error: 'Update failed' };
+        }
+      } catch (error : any) {
+        console.error('Profile update failed:', error);
+        return { success: false, error: error.message};
+      }
     }
 };
-
-    
   
 export default authService;

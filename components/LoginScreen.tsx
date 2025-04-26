@@ -10,6 +10,7 @@ import * as Google from 'expo-auth-session/providers/google';
 import {router} from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import ConfigService from '../services/ConfigService';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -22,9 +23,12 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
   const [isLoading, setIsLoading] = useState(false);
   const navigation = useNavigation<LoginScreenNavigationProp>()
   const [userInfo, setUserInfo] = useState(null);
-  const WEB_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "469869191343-3q7dgv3c0qaf2ptngfgdvanvkbqv18nc.apps.googleusercontent.com";
-  const IOS_CLIENT_ID = process.env.GOOGLE_CLIENT_ID_IOS || "469869191343-cr2flp6klveh6n0sphn4b3craf1os4t8.apps.googleusercontent.com";
-  const API_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:5001";
+  
+  // Use ConfigService to get our configuration values
+  const WEB_CLIENT_ID = ConfigService.auth.google.webClientId;
+  const IOS_CLIENT_ID = ConfigService.auth.google.iosClientId;
+  const API_URL = ConfigService.api.backendUrl;
+  
   const [request, response, promptAsync] = Google.useAuthRequest({
     webClientId: WEB_CLIENT_ID,
     iosClientId: IOS_CLIENT_ID,
