@@ -14,6 +14,13 @@ export default function RootLayout() {
         <Stack.Screen name="index" />
         <Stack.Screen name="login" />
         <Stack.Screen name="home" />
+        <Stack.Screen 
+          name="profile" 
+          options={{
+            title: "User Profile",
+            headerTitleAlign: "center"
+          }}
+        />
       </Stack>
     </GluestackUIProvider>
   );

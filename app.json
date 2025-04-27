@@ -35,10 +35,19 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ]
+      ],
+      "./plugins/withHealthKit"
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "79ca2eb5-e8c5-4f9d-bbbe-6a6190846dcb"
+      }
     }
   }
 }

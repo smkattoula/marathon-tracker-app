@@ -7,9 +7,10 @@ import axios from "axios";
 
 // Interface for potential decoded token payload
 interface TokenPayload {
-  id: string;
-  name: string;
-  email: string;
+  id?: string;
+  name?: string;
+  email?: string;
+  bio?: string;
   // Add other fields as needed
 }
 
@@ -29,10 +30,6 @@ export const exchangeGoogleToken = async (req: Request, res: Response): Promise<
       res.status(400).json({ error: 'No token provided' });
       return;
     }
-    // Need to verify Google token in the future
-    // For now, just generate a simple token
-    // In the future we should verify with Google API
-    const appToken  = `app-token-${Date.now()}`;
 
     const googleResponse = await axios.get(
       `https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${token}`
@@ -58,6 +55,7 @@ export const exchangeGoogleToken = async (req: Request, res: Response): Promise<
           name: user.name,
           email: user.email,
           picture: user.picture,
+          bio: user.bio,
         }
       });
       } else {
@@ -83,7 +81,8 @@ export const getUserProfile = async (req: Request, res: Response): Promise<void>
         id: user._id.toString(),
         name: user.name,
         email: user.email,
-        picture: user.picture
+        picture: user.picture,
+        bio: user.bio
       },
     });
     return;
@@ -109,7 +108,8 @@ export const getUserProfile = async (req: Request, res: Response): Promise<void>
               id: user._id.toString(),
               name: user.name,
               email: user.email,
-              picture: user.picture
+              picture: user.picture,
+              bio: user.bio
             },
           });
           return;
@@ -135,4 +135,59 @@ export const logoutUser = (req: Request, res: Response) => {
       res.json({ loggedOut: true });
     });
   });
+};
+
+// Update User Profile
+export const updateUserProfile = async (req: Request, res: Response): Promise<void> => {
+  // Check for token-based auth
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    res.status(401).json({ error: 'Authentication required' });
+    return;
+  }
+  
+  const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+  
+  // Verify JWT token
+  const payload = verifyToken(token);
+  
+  if (!payload) {
+    res.status(401).json({ error: 'Invalid token' });
+    return;
+  }
+  
+  try {
+    // Find user by ID
+    const user = await User.findById(payload.userId);
+    
+    if (!user) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+    
+    // Update fields that are provided in the request body
+    if (req.body.bio !== undefined) {
+      user.bio = req.body.bio;
+    }
+    
+    // Add more fields here as needed
+    
+    // Save the updated user
+    await user.save();
+    
+    // Return the updated user data
+    res.json({
+      success: true,
+      user: {
+        id: user._id.toString(),
+        name: user.name,
+        email: user.email,
+        picture: user.picture,
+        bio: user.bio
+      },
+    });
+  } catch (error) {
+    console.error('Error updating user profile:', error);
+    res.status(500).json({ error: 'Failed to update user profile' });
+  }
 };
