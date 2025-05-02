@@ -2,11 +2,18 @@ import AppleHealthKit, {
   HealthInputOptions,
   HealthKitPermissions,
   HealthValue,
-  HealthResults,
-  WorkoutOptions,
-  WorkoutRoute,
-} from 'react-native-health';
-import { Platform } from 'react-native';
+  AnchoredQueryResults,
+  HKErrorResponse,
+} from "react-native-health";
+import { Platform } from "react-native";
+
+// Define custom interfaces
+export interface WorkoutRoute {
+  date: string;
+  latitude: number;
+  longitude: number;
+  altitude: number;
+}
 
 // Define the workout type interface
 export interface WorkoutData {
@@ -39,18 +46,13 @@ const PERMISSIONS = {
     read: [
       AppleHealthKit.Constants.Permissions.Workout,
       AppleHealthKit.Constants.Permissions.Steps,
-      AppleHealthKit.Constants.Permissions.DistanceWalking,
-      AppleHealthKit.Constants.Permissions.DistanceRunning,
+      AppleHealthKit.Constants.Permissions.DistanceCycling,
       AppleHealthKit.Constants.Permissions.ActiveEnergyBurned,
       AppleHealthKit.Constants.Permissions.HeartRate,
-      AppleHealthKit.Constants.Permissions.DistanceCycling,
-      AppleHealthKit.Constants.Permissions.RouteSamples,
     ],
-    write: [
-      AppleHealthKit.Constants.Permissions.Workout,
-    ],
+    write: [AppleHealthKit.Constants.Permissions.Workout],
   },
-};
+} as HealthKitPermissions;
 
 class HealthService {
   /**
@@ -59,8 +61,8 @@ class HealthService {
   initialize(): Promise<boolean> {
     return new Promise((resolve, reject) => {
       // Only available on iOS
-      if (Platform.OS !== 'ios') {
-        reject(new Error('HealthKit is only available on iOS'));
+      if (Platform.OS !== "ios") {
+        reject(new Error("HealthKit is only available on iOS"));
         return;
       }
 
@@ -78,39 +80,45 @@ class HealthService {
    * Check if HealthKit is available
    */
   isHealthDataAvailable(): boolean {
-    return Platform.OS === 'ios';
+    return Platform.OS === "ios";
   }
 
   /**
    * Get all running workouts from HealthKit
    * @param options Optional parameters for querying workouts
    */
-  getRunningWorkouts(options: Partial<WorkoutOptions> = {}): Promise<WorkoutData[]> {
+  getRunningWorkouts(
+    options: Partial<HealthInputOptions> = {}
+  ): Promise<WorkoutData[]> {
     return new Promise((resolve, reject) => {
       if (!this.isHealthDataAvailable()) {
-        reject(new Error('HealthKit is not available'));
+        reject(new Error("HealthKit is not available"));
         return;
       }
 
-      AppleHealthKit.getWorkoutsByType(
+      AppleHealthKit.getAnchoredWorkouts(
         {
-          type: 'Running', // Filter for running workouts only
-          limit: 0, // No limit
           ascending: false, // Most recent first
           ...options,
-        },
-        (err: string, results: HealthResults) => {
+        } as HealthInputOptions,
+        (err: HKErrorResponse, results: AnchoredQueryResults) => {
           if (err) {
-            reject(new Error(err));
+            reject(new Error(err.message || "Unknown error occurred"));
             return;
           }
-          
+
+          // Check if results is valid and contains data array
+          if (!results || !results.data) {
+            resolve([]);
+            return;
+          }
+
           // Cast to workout data array and normalize the data
-          const workouts = results.map((workout: any) => ({
+          const workouts = results.data.map((workout: any) => ({
             id: workout.id || String(workout.startDate),
             startDate: workout.startDate,
             endDate: workout.endDate,
-            activityName: workout.activityName || 'Running',
+            activityName: workout.activityName || "Running",
             activityId: workout.activityId || 0,
             calories: workout.calories || 0,
             distance: workout.distance || 0, // in meters
@@ -118,9 +126,9 @@ class HealthService {
             hasRoute: !!workout.route,
             route: workout.route,
           }));
-          
+
           resolve(workouts);
-        },
+        }
       );
     });
   }
@@ -132,7 +140,7 @@ class HealthService {
   getWorkoutRoute(workoutId: string): Promise<WorkoutRoute[]> {
     return new Promise((resolve, reject) => {
       if (!this.isHealthDataAvailable()) {
-        reject(new Error('HealthKit is not available'));
+        reject(new Error("HealthKit is not available"));
         return;
       }
 
@@ -160,21 +168,31 @@ class HealthService {
     }
 
     const totalWorkouts = workouts.length;
-    const totalDistance = workouts.reduce((sum, workout) => sum + workout.distance, 0);
-    const totalDuration = workouts.reduce((sum, workout) => sum + workout.duration, 0);
-    const totalCalories = workouts.reduce((sum, workout) => sum + workout.calories, 0);
-    
+    const totalDistance = workouts.reduce(
+      (sum, workout) => sum + workout.distance,
+      0
+    );
+    const totalDuration = workouts.reduce(
+      (sum, workout) => sum + workout.duration,
+      0
+    );
+    const totalCalories = workouts.reduce(
+      (sum, workout) => sum + workout.calories,
+      0
+    );
+
     // Calculate average pace (min/km) from total duration and distance
-    const avgPace = totalDistance > 0 ? (totalDuration / 60) / (totalDistance / 1000) : 0;
-    
+    const avgPace =
+      totalDistance > 0 ? totalDuration / 60 / (totalDistance / 1000) : 0;
+
     // Find the longest workout by distance
-    const longestDistance = Math.max(...workouts.map(w => w.distance));
-    
+    const longestDistance = Math.max(...workouts.map((w) => w.distance));
+
     // Find the fastest pace
     let fastestPace = Infinity;
-    workouts.forEach(workout => {
+    workouts.forEach((workout) => {
       if (workout.distance > 0) {
-        const pace = (workout.duration / 60) / (workout.distance / 1000);
+        const pace = workout.duration / 60 / (workout.distance / 1000);
         if (pace < fastestPace) {
           fastestPace = pace;
         }
@@ -197,12 +215,14 @@ class HealthService {
    * @param pace Pace in minutes per kilometer
    */
   formatPace(pace: number): string {
-    if (!pace || pace === 0 || pace === Infinity) return '--:--';
-    
+    if (!pace || pace === 0 || pace === Infinity) return "--:--";
+
     const minutes = Math.floor(pace);
     const seconds = Math.floor((pace - minutes) * 60);
-    
-    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+    return `${minutes.toString().padStart(2, "0")}:${seconds
+      .toString()
+      .padStart(2, "0")}`;
   }
 }
 

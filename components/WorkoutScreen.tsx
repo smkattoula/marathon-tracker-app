@@ -89,15 +89,15 @@ export default function WorkoutScreen() {
         <Heading size="sm">{formatDate(item.startDate)}</Heading>
         <HStack space="lg" style={styles.workoutStatsContainer}>
           <VStack>
-            <Text size="xs" opacity={0.7}>Distance</Text>
+            <Text size="xs" style={{ opacity: 0.7 }}>Distance</Text>
             <Text size="md" bold>{formatDistance(item.distance)}</Text>
           </VStack>
           <VStack>
-            <Text size="xs" opacity={0.7}>Duration</Text>
+            <Text size="xs" style={{ opacity: 0.7 }}>Duration</Text>
             <Text size="md" bold>{formatDuration(item.duration)}</Text>
           </VStack>
           <VStack>
-            <Text size="xs" opacity={0.7}>Pace</Text>
+            <Text size="xs" style={{ opacity: 0.7 }}>Pace</Text>
             <Text size="md" bold>
               {item.distance > 0 ? 
                 healthService.formatPace((item.duration / 60) / (item.distance / 1000)) : 
@@ -156,36 +156,36 @@ export default function WorkoutScreen() {
               
               <HStack space="xl" style={styles.statsRow}>
                 <VStack style={styles.statItem}>
-                  <Text size="xs" opacity={0.7}>Total Runs</Text>
+                  <Text size="xs" style={{ opacity: 0.7 }}>Total Runs</Text>
                   <Text size="lg" bold>{stats.totalWorkouts}</Text>
                 </VStack>
                 
                 <VStack style={styles.statItem}>
-                  <Text size="xs" opacity={0.7}>Total Distance</Text>
+                  <Text size="xs" style={{ opacity: 0.7 }}>Total Distance</Text>
                   <Text size="lg" bold>{formatDistance(stats.totalDistance)}</Text>
                 </VStack>
               </HStack>
               
               <HStack space="xl" style={styles.statsRow}>
                 <VStack style={styles.statItem}>
-                  <Text size="xs" opacity={0.7}>Avg Pace</Text>
+                  <Text size="xs" style={{ opacity: 0.7 }}>Avg Pace</Text>
                   <Text size="lg" bold>{healthService.formatPace(stats.avgPace)}</Text>
                 </VStack>
                 
                 <VStack style={styles.statItem}>
-                  <Text size="xs" opacity={0.7}>Fastest Pace</Text>
+                  <Text size="xs" style={{ opacity: 0.7 }}>Fastest Pace</Text>
                   <Text size="lg" bold>{healthService.formatPace(stats.fastestPace)}</Text>
                 </VStack>
               </HStack>
               
               <HStack space="xl" style={styles.statsRow}>
                 <VStack style={styles.statItem}>
-                  <Text size="xs" opacity={0.7}>Longest Run</Text>
+                  <Text size="xs" style={{ opacity: 0.7 }}>Longest Run</Text>
                   <Text size="lg" bold>{formatDistance(stats.longestDistance)}</Text>
                 </VStack>
                 
                 <VStack style={styles.statItem}>
-                  <Text size="xs" opacity={0.7}>Total Calories</Text>
+                  <Text size="xs" style={{ opacity: 0.7 }}>Total Calories</Text>
                   <Text size="lg" bold>{Math.round(stats.totalCalories)} kcal</Text>
                 </VStack>
               </HStack>
@@ -198,8 +198,8 @@ export default function WorkoutScreen() {
           
           {workouts.length === 0 ? (
             <Card style={styles.emptyStateCard}>
-              <Text size="md" textAlign="center">No running workouts found in Health app</Text>
-              <Text size="sm" textAlign="center" style={{ marginTop: 10, opacity: 0.7 }}>
+              <Text size="md" style={{textAlign: "center"}}>No running workouts found in Health app</Text>
+              <Text size="sm" style={{textAlign: "center", marginTop: 10, opacity: 0.7}}>
                 Complete a run with your Apple Watch or iPhone to see your data here
               </Text>
               <Button onPress={loadWorkouts} style={{ marginTop: 20 }}>

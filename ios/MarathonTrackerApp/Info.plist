@@ -45,6 +45,10 @@
       <key>NSAllowsLocalNetworking</key>
       <true/>
     </dict>
+    <key>NSHealthShareUsageDescription</key>
+    <string>Allow Marathon Tracker to read your health data for workout and activity information</string>
+    <key>NSHealthUpdateUsageDescription</key>
+    <string>Allow Marathon Tracker to write workout data to your Health app</string>
     <key>NSUserActivityTypes</key>
     <array>
       <string>$(PRODUCT_BUNDLE_IDENTIFIER).expo.index_route</string>
