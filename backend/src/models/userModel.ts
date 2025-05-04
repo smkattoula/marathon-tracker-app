@@ -7,6 +7,7 @@ export interface IUser extends Document {
   email: string;
   picture?: string;
   locale?: string;
+  bio?: string;
   lastLogin?: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -20,6 +21,7 @@ const userSchema = new Schema<IUser>(
     picture: { type: String },
     locale: { type: String },
     lastLogin: { type: Date, default: Date.now },
+    bio: { type: String },
     
   },
   { timestamps: true }

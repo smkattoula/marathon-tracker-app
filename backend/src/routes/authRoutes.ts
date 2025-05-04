@@ -5,6 +5,7 @@ import {
   logoutUser,
   handleOAuthSuccess,
   exchangeGoogleToken,
+  updateUserProfile,
 } from "../controllers/authController";
 
 const API_URL = 'http://localhost:5001';
@@ -31,5 +32,8 @@ router.get("/me", getUserProfile);
 router.get("/logout", logoutUser);
 
 router.post('/google-token-exchange', exchangeGoogleToken);
+
+// Update user profile route
+router.put('/update-profile', updateUserProfile);
 
 export default router;

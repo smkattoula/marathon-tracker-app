@@ -1,50 +1,84 @@
-# Welcome to your Expo app 👋
+# Marathon Tracker App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A React Native application for tracking marathon activities built with Expo.
 
-## Get started
+## Setup for Development
 
-1. Install dependencies
-
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-    npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
+1. Clone the repository
 ```bash
-npm run reset-project
+git clone https://github.com/yourusername/marathon-tracker-app.git
+cd marathon-tracker-app
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+2. Install dependencies
+```bash
+npm install
+cd backend && npm install
+cd ..
+```
 
-## Learn more
+3. Configure environment variables
+```bash
+# Copy the example environment file
+cp .env.example .env
 
-To learn more about developing your project with Expo, look at the following resources:
+# Edit the .env file with your credentials
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+4. Update the `.env` file with your own credentials:
+```
+# Backend URL
+REACT_APP_BACKEND_URL=http://localhost:5001
 
-## Join the community
+# Google OAuth credentials
+EXPO_PUBLIC_GOOGLE_CLIENT_ID=your-web-client-id.apps.googleusercontent.com
+EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID=your-ios-client-id.apps.googleusercontent.com
 
-Join our community of developers creating universal apps.
+# App configuration
+EXPO_PUBLIC_APP_BUNDLE_ID=com.yourname.MarathonTrackerApp
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Authentication Setup for Testing
+
+### Setting up Google OAuth Credentials
+
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project or select an existing one
+3. Navigate to "APIs & Services" > "Credentials"
+4. Click "Create Credentials" > "OAuth client ID"
+5. For iOS:
+   - Select "iOS" as the application type
+   - Enter your Bundle ID (should match EXPO_PUBLIC_APP_BUNDLE_ID in your .env)
+6. For Web:
+   - Select "Web application" as the application type
+   - Add authorized redirect URIs: `https://auth.expo.io/@your-expo-username/MarathonTrackerApp`
+7. Copy the Client IDs to your .env file
+
+### Configuring Your Bundle ID
+
+If you're testing on iOS and don't have access to the original developer account:
+
+1. Use your own Bundle ID in the .env file 
+2. When opening the Xcode project, sign with your own development team
+3. This will automatically update the Bundle ID prefix
+
+## Starting the App
+
+1. Start the backend server
+```bash
+cd backend
+npm run dev
+```
+
+2. In a new terminal, start the Expo development server
+```bash
+npm start
+```
+
+3. Press 'i' to open in iOS simulator or 'a' for Android
+
+## Troubleshooting Authentication
+
+- Make sure your device can reach your development backend server
+- Check that Google OAuth credentials are correctly configured
+- For iOS, ensure you're using the correct Bundle ID that matches your credentials

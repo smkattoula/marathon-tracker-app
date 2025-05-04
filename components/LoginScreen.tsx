@@ -2,29 +2,28 @@
 import React, { useEffect, useState } from 'react';
 import { View, Button, Text } from 'react-native';
 import authService from '../services/AuthService';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../navigation/types';
-import { useNavigation } from '@react-navigation/native';
 import * as WebBrowser from 'expo-web-browser';
 import * as Google from 'expo-auth-session/providers/google';
-import {router} from 'expo-router';
+import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import ConfigService from '../services/ConfigService';
 
 WebBrowser.maybeCompleteAuthSession();
 
 interface LoginScreenProps {
     onLoginSuccess?: () => void;
   }
-type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
 export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const navigation = useNavigation<LoginScreenNavigationProp>()
   const [userInfo, setUserInfo] = useState(null);
-  const WEB_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "469869191343-3q7dgv3c0qaf2ptngfgdvanvkbqv18nc.apps.googleusercontent.com";
-  const IOS_CLIENT_ID = process.env.GOOGLE_CLIENT_ID_IOS || "469869191343-cr2flp6klveh6n0sphn4b3craf1os4t8.apps.googleusercontent.com";
-  const API_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:5001";
+  
+  // Use ConfigService to get our configuration values
+  const WEB_CLIENT_ID = ConfigService.auth.google.webClientId;
+  const IOS_CLIENT_ID = ConfigService.auth.google.iosClientId;
+  const API_URL = ConfigService.api.backendUrl;
+  
   const [request, response, promptAsync] = Google.useAuthRequest({
     webClientId: WEB_CLIENT_ID,
     iosClientId: IOS_CLIENT_ID,
@@ -51,15 +50,18 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
               if (onLoginSuccess) {
                 onLoginSuccess();
               } 
-              router.replace("/home");
+              // Force an explicit navigation to home instead of replace
+              router.navigate("/home");
             }
           } catch (error) {
             console.error('Error exchanging token:', error);
+            // Handle error state properly
+            setIsLoading(false);
           }
         };
         exchangeToken();
       }
-  }, [response]);
+  }, [response, API_URL, onLoginSuccess]);
 
   const handleLogin = async () => {
     console.log('Attempting Google login:');
