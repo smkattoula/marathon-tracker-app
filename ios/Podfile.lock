@@ -1,7 +1,7 @@
 PODS:
   - boost (1.84.0)
   - DoubleConversion (1.1.6)
-  - EXApplication (6.0.2):
+  - EXApplication (6.1.4):
     - ExpoModulesCore
   - EXConstants (17.0.8):
     - ExpoModulesCore
@@ -11,7 +11,7 @@ PODS:
     - ExpoModulesCore
   - ExpoBlur (14.0.3):
     - ExpoModulesCore
-  - ExpoCrypto (14.0.2):
+  - ExpoCrypto (14.1.4):
     - ExpoModulesCore
   - ExpoFileSystem (18.0.12):
     - ExpoModulesCore
@@ -19,7 +19,7 @@ PODS:
     - ExpoModulesCore
   - ExpoHaptics (14.0.1):
     - ExpoModulesCore
-  - ExpoHead (4.0.20):
+  - ExpoHead (4.0.21):
     - ExpoModulesCore
   - ExpoKeepAwake (14.0.3):
     - ExpoModulesCore
@@ -2061,16 +2061,16 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   boost: 1dca942403ed9342f98334bf4c3621f011aa7946
   DoubleConversion: f16ae600a246532c4020132d54af21d0ddb2a385
-  EXApplication: 4c72f6017a14a65e338c5e74fca418f35141e819
+  EXApplication: 63b87ca5204304007fac6b1be432f8afa3731c17
   EXConstants: fcfc75800824ac2d5c592b5bc74130bad17b146b
   Expo: a6ff273c618506b12129a0d06f2a08201bfbcf43
   ExpoAsset: 48386d40d53a8c1738929b3ed509bcad595b5516
   ExpoBlur: 392c1207f71d0ecf22371621c1fbd44ba84d9742
-  ExpoCrypto: e97e864c8d7b9ce4a000bca45dddb93544a1b2b4
+  ExpoCrypto: e5098d184ff5989ac395542d5d41f84e2051bffa
   ExpoFileSystem: 42d363d3b96f9afab980dcef60d5657a4443c655
   ExpoFont: f354e926f8feae5e831ec8087f36652b44a0b188
   ExpoHaptics: 8d199b2f33245ea85289ff6c954c7ee7c00a5b5d
-  ExpoHead: cee2d16ef197aaadb0ac481cf221a663636eb074
+  ExpoHead: df924203fbf8e0913fc38b0f6aec71f9a9115482
   ExpoKeepAwake: b0171a73665bfcefcfcc311742a72a956e6aa680
   ExpoLinking: 8d12bee174ba0cdf31239706578e29e74a417402
   ExpoModulesCore: 725faec070d590810d2ea5983d9f78f7cf6a38ec

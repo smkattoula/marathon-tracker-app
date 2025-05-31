@@ -1,11 +1,12 @@
 import React from "react";
 import { View } from "react-native";
+import ThemeAwareScreen from "@/components/ui/theme-aware-screen";
 import { Text } from "@/components/ui/text";
 import { Button, ButtonText, ButtonIcon } from "@/components/ui/button";
 import { Menu, MenuItem, MenuItemLabel } from "@/components/ui/menu";
 import { MenuIcon } from "@/components/ui/icon";
 import axios from "axios";
-import {router } from "expo-router";
+import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import ConfigService from "@/services/ConfigService";
 
@@ -22,7 +23,7 @@ export default function HomeScreen({ user }: HomeScreenProps) {
   const [menuOpen, setMenuOpen] = React.useState(false);
 
   const API_URL = ConfigService.api.backendUrl;
-    
+
   const handleLogout = async () => {
     try {
       await axios.get(`${API_URL}/auth/logout`, {
@@ -43,11 +44,7 @@ export default function HomeScreen({ user }: HomeScreenProps) {
   };
 
   return (
-    <View
-      style={{
-        flex: 1,
-      }}
-    >
+    <ThemeAwareScreen>
       <View
         style={{
           position: "absolute",
@@ -77,7 +74,7 @@ export default function HomeScreen({ user }: HomeScreenProps) {
             key="Profile"
             textValue="Profile"
             className="p-2 justify-between"
-            onPress={() => router.push('/profile')}
+            onPress={() => router.push("/profile")}
           >
             <MenuItemLabel size="sm">Profile</MenuItemLabel>
           </MenuItem>
@@ -85,14 +82,24 @@ export default function HomeScreen({ user }: HomeScreenProps) {
             key="Workouts"
             textValue="Workouts"
             className="p-2 justify-between"
-            onPress={() => router.push('/workouts')}
+            onPress={() => router.push("/workouts")}
           >
             <MenuItemLabel size="sm">Workouts</MenuItemLabel>
           </MenuItem>
-          <MenuItem key="Settings" textValue="Settings" className="p-2">
+          <MenuItem
+            key="Settings"
+            textValue="Settings"
+            className="p-2"
+            onPress={() => router.push("/settings")}
+          >
             <MenuItemLabel size="sm">Settings</MenuItemLabel>
           </MenuItem>
-          <MenuItem key="Logout" textValue="Logout" className="p-2" onPress={handleLogout}>
+          <MenuItem
+            key="Logout"
+            textValue="Logout"
+            className="p-2"
+            onPress={handleLogout}
+          >
             <MenuItemLabel size="sm">Logout</MenuItemLabel>
           </MenuItem>
         </Menu>
@@ -106,15 +113,18 @@ export default function HomeScreen({ user }: HomeScreenProps) {
             Hello, {user.name}!
           </Text>
         )}
-        <Button 
-          size="lg" 
+        <Button
+          size="lg"
           style={{ marginTop: 30 }}
-          onPress={() => router.push('/workouts')}
+          onPress={() => router.push("/workouts")}
         >
           <ButtonText>View Running History</ButtonText>
         </Button>
-        <Text size="sm" style={{ marginTop: 20 }}> By Dusk Digital</Text>
+        <Text size="sm" style={{ marginTop: 20 }}>
+          {" "}
+          By Dusk Digital
+        </Text>
       </View>
-    </View>
+    </ThemeAwareScreen>
   );
 }
