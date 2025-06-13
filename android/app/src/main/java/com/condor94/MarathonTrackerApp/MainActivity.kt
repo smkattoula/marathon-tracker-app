@@ -1,4 +1,4 @@
-package com.condor94.MarathonTrackerApp
+package com.smkattoula.MarathonTrackerApp
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

@@ -86,9 +86,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.condor94.MarathonTrackerApp'
+    namespace 'com.smkattoula.MarathonTrackerApp'
     defaultConfig {
-        applicationId 'com.condor94.MarathonTrackerApp'
+        applicationId 'com.smkattoula.MarathonTrackerApp'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

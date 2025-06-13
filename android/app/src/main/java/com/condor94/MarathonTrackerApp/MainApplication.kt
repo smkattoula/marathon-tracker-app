@@ -1,4 +1,4 @@
-package com.condor94.MarathonTrackerApp
+package com.smkattoula.MarathonTrackerApp
 
 import android.app.Application
 import android.content.res.Configuration

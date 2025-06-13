@@ -28,7 +28,7 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>myapp</string>
-				<string>com.condor94.MarathonTrackerApp</string>
+				<string>com.smkattoula.MarathonTrackerApp</string>
 			</array>
 		</dict>
 	</array>

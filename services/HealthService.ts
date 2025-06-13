@@ -23,7 +23,7 @@ export interface WorkoutData {
   activityName: string;
   activityId: number;
   calories: number;
-  distance: number;
+  distance: number; // stored in miles
   duration: number;
   hasRoute?: boolean;
   route?: WorkoutRoute[];
@@ -32,12 +32,12 @@ export interface WorkoutData {
 // Define return type for getWorkoutStats
 export interface WorkoutStats {
   totalWorkouts: number;
-  totalDistance: number; // in meters
+  totalDistance: number; // in miles
   totalDuration: number; // in seconds
   totalCalories: number;
-  avgPace: number; // in minutes per kilometer
-  longestDistance: number; // in meters
-  fastestPace: number; // in minutes per kilometer
+  avgPace: number; // in minutes per mile
+  longestDistance: number; // in miles
+  fastestPace: number; // in minutes per mile
 }
 
 // Define the permission scopes required by the app
@@ -99,6 +99,7 @@ class HealthService {
       AppleHealthKit.getAnchoredWorkouts(
         {
           ascending: false, // Most recent first
+          type: AppleHealthKit.Constants.Activities.Running, // Only running workouts
           ...options,
         } as HealthInputOptions,
         (err: HKErrorResponse, results: AnchoredQueryResults) => {
@@ -113,19 +114,38 @@ class HealthService {
             return;
           }
 
-          // Cast to workout data array and normalize the data
-          const workouts = results.data.map((workout: any) => ({
-            id: workout.id || String(workout.startDate),
-            startDate: workout.startDate,
-            endDate: workout.endDate,
-            activityName: workout.activityName || "Running",
-            activityId: workout.activityId || 0,
-            calories: workout.calories || 0,
-            distance: workout.distance || 0, // in meters
-            duration: workout.duration || 0, // in seconds
-            hasRoute: !!workout.route,
-            route: workout.route,
-          }));
+          // Filter and map workout data to only include running activities
+          const workouts = results.data
+            .filter((workout: any) => {
+              // Filter for running activities only
+              const activityName = (workout.activityName || "").toLowerCase();
+              return (
+                activityName.includes("running") || activityName.includes("run")
+              );
+            })
+            .map((workout: any) => {
+              // Validate and normalize numeric values
+              const distanceInMiles = this.validateNumber(workout.distance, 0);
+              const duration = this.validateNumber(workout.duration, 0);
+              const calories = this.validateNumber(workout.calories, 0);
+
+              // Parse dates properly - HealthKit uses 'start' and 'end' field names
+              const startDate = this.parseHealthKitDate(workout.start);
+              const endDate = this.parseHealthKitDate(workout.end);
+
+              return {
+                id: workout.id || String(startDate),
+                startDate,
+                endDate,
+                activityName: workout.activityName || "Running",
+                activityId: this.validateNumber(workout.activityId, 0),
+                calories,
+                distance: distanceInMiles, // stored in miles as received from HealthKit
+                duration, // in seconds
+                hasRoute: Boolean(workout.route),
+                route: Array.isArray(workout.route) ? workout.route : undefined,
+              };
+            });
 
           resolve(workouts);
         }
@@ -181,9 +201,8 @@ class HealthService {
       0
     );
 
-    // Calculate average pace (min/km) from total duration and distance
-    const avgPace =
-      totalDistance > 0 ? totalDuration / 60 / (totalDistance / 1000) : 0;
+    // Calculate average pace (min/mile) from total duration and distance
+    const avgPace = totalDistance > 0 ? totalDuration / 60 / totalDistance : 0;
 
     // Find the longest workout by distance
     const longestDistance = Math.max(...workouts.map((w) => w.distance));
@@ -192,7 +211,7 @@ class HealthService {
     let fastestPace = Infinity;
     workouts.forEach((workout) => {
       if (workout.distance > 0) {
-        const pace = workout.duration / 60 / (workout.distance / 1000);
+        const pace = workout.duration / 60 / workout.distance;
         if (pace < fastestPace) {
           fastestPace = pace;
         }
@@ -211,10 +230,70 @@ class HealthService {
   }
 
   /**
-   * Format pace from minutes per kilometer to display format (MM:SS)
-   * @param pace Pace in minutes per kilometer
+   * Validate and sanitize numeric values from HealthKit
+   * @param value The value to validate
+   * @param defaultValue Default value if validation fails
    */
-  formatPace(pace: number): string {
+  private validateNumber(value: any, defaultValue: number = 0): number {
+    const num = Number(value);
+    return !isNaN(num) && isFinite(num) && num >= 0 ? num : defaultValue;
+  }
+
+  /**
+   * Parse HealthKit date format to ISO string
+   * @param dateValue The date value from HealthKit
+   */
+  private parseHealthKitDate(dateValue: any): string {
+    if (!dateValue) return new Date().toISOString();
+
+    // Try parsing as-is first
+    let date = new Date(dateValue);
+
+    // If invalid, try treating as timestamp
+    if (isNaN(date.getTime())) {
+      const timestamp = Number(dateValue);
+      if (!isNaN(timestamp)) {
+        date = new Date(timestamp);
+      }
+    }
+
+    // If still invalid, return current date
+    if (isNaN(date.getTime())) {
+      console.warn("Invalid date from HealthKit:", dateValue);
+      return new Date().toISOString();
+    }
+
+    return date.toISOString();
+  }
+
+  /**
+   * Convert distance between miles and kilometers
+   * @param distance Distance value
+   * @param fromUnit Current unit ('miles' or 'km')
+   * @param toUnit Target unit ('miles' or 'km')
+   */
+  convertDistance(
+    distance: number,
+    fromUnit: "miles" | "km",
+    toUnit: "miles" | "km"
+  ): number {
+    if (fromUnit === toUnit) return distance;
+
+    if (fromUnit === "miles" && toUnit === "km") {
+      return distance * 1.609344;
+    } else if (fromUnit === "km" && toUnit === "miles") {
+      return distance / 1.609344;
+    }
+
+    return distance;
+  }
+
+  /**
+   * Format pace to display format (MM:SS)
+   * @param pace Pace in minutes per unit
+   * @param unit The unit ('miles' or 'km')
+   */
+  formatPace(pace: number, unit: "miles" | "km" = "miles"): string {
     if (!pace || pace === 0 || pace === Infinity) return "--:--";
 
     const minutes = Math.floor(pace);
