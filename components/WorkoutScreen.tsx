@@ -225,10 +225,12 @@ export default function WorkoutScreen() {
 
   if (loading) {
     return (
-      <View style={styles.container}>
-        <ActivityIndicator size="large" />
-        <Text style={{ marginTop: 20 }}>Loading your workouts...</Text>
-      </View>
+      <ThemeAwareScreen>
+        <View style={styles.container}>
+          <ActivityIndicator size="large" />
+          <Text style={{ marginTop: 20 }}>Loading your workouts...</Text>
+        </View>
+      </ThemeAwareScreen>
     );
   }
 
