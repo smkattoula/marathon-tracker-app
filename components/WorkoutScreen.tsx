@@ -14,6 +14,7 @@ import { Divider } from "@/components/ui/divider";
 import { VStack } from "@/components/ui/vstack";
 import { HStack } from "@/components/ui/hstack";
 import healthService, { WorkoutData } from "@/services/HealthService";
+import ThemeAwareScreen from "./ui/theme-aware-screen";
 
 interface WorkoutStats {
   totalWorkouts: number;
@@ -248,115 +249,115 @@ export default function WorkoutScreen() {
   }
 
   return (
-    <ScrollView style={styles.scrollView}>
-      <View style={styles.container}>
-        <Heading size="xl" style={styles.pageTitle}>
-          Running History
-        </Heading>
-
-        {stats && (
-          <Card style={styles.statsCard}>
-            <VStack space="md">
-              <Heading size="md">Summary Statistics</Heading>
-              <Divider />
-
-              <HStack space="xl" style={styles.statsRow}>
-                <VStack style={styles.statItem}>
-                  <Text size="xs" style={{ opacity: 0.7 }}>
-                    Total Runs
-                  </Text>
-                  <Text size="lg" bold>
-                    {stats.totalWorkouts ?? 0}
-                  </Text>
-                </VStack>
-
-                <VStack style={styles.statItem}>
-                  <Text size="xs" style={{ opacity: 0.7 }}>
-                    Total Distance
-                  </Text>
-                  <Text size="lg" bold>
-                    {(stats.totalDistanceMi ?? 0).toFixed(2)} mi
-                  </Text>
-                </VStack>
-              </HStack>
-
-              <HStack space="xl" style={styles.statsRow}>
-                <VStack style={styles.statItem}>
-                  <Text size="xs" style={{ opacity: 0.7 }}>
-                    Avg Pace
-                  </Text>
-                  <Text size="lg" bold>
-                    {formatPace(stats.avgPaceSecPerMi ?? 0)}
-                  </Text>
-                </VStack>
-
-                <VStack style={styles.statItem}>
-                  <Text size="xs" style={{ opacity: 0.7 }}>
-                    Fastest Pace
-                  </Text>
-                  <Text size="lg" bold>
-                    {formatPace(stats.fastestPaceSecPerMi ?? 0)}
-                  </Text>
-                </VStack>
-              </HStack>
-
-              <HStack space="xl" style={styles.statsRow}>
-                <VStack style={styles.statItem}>
-                  <Text size="xs" style={{ opacity: 0.7 }}>
-                    Longest Run
-                  </Text>
-                  <Text size="lg" bold>
-                    {(stats.longestDistanceMi ?? 0).toFixed(2)} mi
-                  </Text>
-                </VStack>
-
-                <VStack style={styles.statItem}>
-                  <Text size="xs" style={{ opacity: 0.7 }}>
-                    Total Calories
-                  </Text>
-                  <Text size="lg" bold>
-                    {Math.round(stats.totalCalories ?? 0)} kcal
-                  </Text>
-                </VStack>
-              </HStack>
-            </VStack>
-          </Card>
-        )}
-
-        <View style={styles.workoutsContainer}>
-          <Heading size="md" style={styles.sectionTitle}>
-            Recent Workouts
+    <ThemeAwareScreen>
+      <ScrollView style={styles.scrollView}>
+        <View style={styles.container}>
+          <Heading size="xl" style={styles.pageTitle}>
+            Running History
           </Heading>
 
-          {workouts.length === 0 ? (
-            <Card style={styles.emptyStateCard}>
-              <Text size="md" style={{ textAlign: "center" }}>
-                No running workouts found in Health app
-              </Text>
-              <Text
-                size="sm"
-                style={{ textAlign: "center", marginTop: 10, opacity: 0.7 }}
-              >
-                Complete a run with your Apple Watch or iPhone to see your data
-                here
-              </Text>
-              <Button onPress={loadWorkouts} style={{ marginTop: 20 }}>
-                <ButtonText>Refresh</ButtonText>
-              </Button>
+          {stats && (
+            <Card style={styles.statsCard}>
+              <VStack space="md">
+                <Heading size="md">Summary Statistics</Heading>
+                <Divider />
+                <HStack space="xl" style={styles.statsRow}>
+                  <VStack style={styles.statItem}>
+                    <Text size="xs" style={{ opacity: 0.7 }}>
+                      Total Runs
+                    </Text>
+                    <Text size="lg" bold>
+                      {stats.totalWorkouts ?? 0}
+                    </Text>
+                  </VStack>
+
+                  <VStack style={styles.statItem}>
+                    <Text size="xs" style={{ opacity: 0.7 }}>
+                      Total Distance
+                    </Text>
+                    <Text size="lg" bold>
+                      {(stats.totalDistanceMi ?? 0).toFixed(2)} mi
+                    </Text>
+                  </VStack>
+                </HStack>
+
+                <HStack space="xl" style={styles.statsRow}>
+                  <VStack style={styles.statItem}>
+                    <Text size="xs" style={{ opacity: 0.7 }}>
+                      Avg Pace
+                    </Text>
+                    <Text size="lg" bold>
+                      {formatPace(stats.avgPaceSecPerMi ?? 0)}
+                    </Text>
+                  </VStack>
+
+                  <VStack style={styles.statItem}>
+                    <Text size="xs" style={{ opacity: 0.7 }}>
+                      Fastest Pace
+                    </Text>
+                    <Text size="lg" bold>
+                      {formatPace(stats.fastestPaceSecPerMi ?? 0)}
+                    </Text>
+                  </VStack>
+                </HStack>
+
+                <HStack space="xl" style={styles.statsRow}>
+                  <VStack style={styles.statItem}>
+                    <Text size="xs" style={{ opacity: 0.7 }}>
+                      Longest Run
+                    </Text>
+                    <Text size="lg" bold>
+                      {(stats.longestDistanceMi ?? 0).toFixed(2)} mi
+                    </Text>
+                  </VStack>
+
+                  <VStack style={styles.statItem}>
+                    <Text size="xs" style={{ opacity: 0.7 }}>
+                      Total Calories
+                    </Text>
+                    <Text size="lg" bold>
+                      {Math.round(stats.totalCalories ?? 0)} kcal
+                    </Text>
+                  </VStack>
+                </HStack>
+              </VStack>
             </Card>
-          ) : (
-            <FlatList
-              data={workouts}
-              renderItem={renderWorkoutItem}
-              keyExtractor={(item) => item.id}
-              contentContainerStyle={styles.workoutList}
-              showsVerticalScrollIndicator={false}
-              scrollEnabled={false}
-            />
           )}
+          <View style={styles.workoutsContainer}>
+            <Heading size="md" style={styles.sectionTitle}>
+              Recent Workouts
+            </Heading>
+
+            {workouts.length === 0 ? (
+              <Card style={styles.emptyStateCard}>
+                <Text size="md" style={{ textAlign: "center" }}>
+                  No running workouts found in Health app
+                </Text>
+                <Text
+                  size="sm"
+                  style={{ textAlign: "center", marginTop: 10, opacity: 0.7 }}
+                >
+                  Complete a run with your Apple Watch or iPhone to see your
+                  data here
+                </Text>
+                <Button onPress={loadWorkouts} style={{ marginTop: 20 }}>
+                  <ButtonText>Refresh</ButtonText>
+                </Button>
+              </Card>
+            ) : (
+              <FlatList
+                data={workouts}
+                renderItem={renderWorkoutItem}
+                keyExtractor={(item) => item.id}
+                contentContainerStyle={styles.workoutList}
+                showsVerticalScrollIndicator={false}
+                scrollEnabled={false}
+              />
+            )}
+          </View>
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </ThemeAwareScreen>
   );
 }
 
