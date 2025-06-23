@@ -47,9 +47,9 @@ Headers are automatically themed in the `_layout.tsx` file using the Stack scree
 <Stack
   screenOptions={{
     headerStyle: {
-      backgroundColor: theme === "dark" ? "#181818" : "#FFFFFF",
+      backgroundColor: theme === "dark" ? "#181818" : "#f2f2f2",
     },
-    headerTintColor: theme === "dark" ? "#FFFFFF" : "#000000",
+    headerTintColor: theme === "dark" ? "#f2f2f2" : "#000000",
   }}
 >
 ```

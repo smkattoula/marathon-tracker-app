@@ -2,7 +2,7 @@
   "expo": {
     "name": "MarathonTrackerApp",
     "slug": "MarathonTrackerApp",
-    "owner": "condor94",
+    "owner": "smkattoula",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -12,14 +12,14 @@
     "newArchEnabled": false,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.condor94.MarathonTrackerApp"
+      "bundleIdentifier": "com.smkattoula.MarathonTrackerApp"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.condor94.MarathonTrackerApp"
+      "package": "com.smkattoula.MarathonTrackerApp"
     },
     "web": {
       "bundler": "metro",
