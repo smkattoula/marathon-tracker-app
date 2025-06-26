@@ -8,10 +8,12 @@ import { VStack } from "@/components/ui/vstack";
 import { HStack } from "@/components/ui/hstack";
 import { Switch } from "@/components/ui/switch";
 import { ThemeContext } from "@/app/_layout";
+import { useUnit } from "@/contexts/UnitContext";
 import ThemeAwareScreen from "@/components/ui/theme-aware-screen";
 
 export default function SettingsScreen() {
   const { theme, toggleTheme } = useContext(ThemeContext);
+  const { unit, toggleUnit } = useUnit();
 
   return (
     <ThemeAwareScreen>
@@ -48,11 +50,8 @@ export default function SettingsScreen() {
                 <Text size="md">Use Kilometers</Text>
                 <Switch
                   size="md"
-                  isChecked={true}
-                  onToggle={() => {
-                    // This would be implemented when you add unit preferences
-                    console.log("Unit preference toggled");
-                  }}
+                  isChecked={unit === 'km'}
+                  onToggle={toggleUnit}
                   trackColor={{
                     false: "#767577",
                     true: "#81b0ff",

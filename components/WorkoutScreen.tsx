@@ -20,6 +20,7 @@ import healthService, {
   WorkoutData,
   WorkoutStats,
 } from "@/services/HealthService";
+import { useUnit } from "@/contexts/UnitContext";
 import { router } from "expo-router";
 
 export default function WorkoutScreen() {
@@ -28,6 +29,7 @@ export default function WorkoutScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [healthAvailable, setHealthAvailable] = useState(false);
+  const { unit } = useUnit();
 
   useEffect(() => {
     const isAvailable = healthService.isHealthDataAvailable();
@@ -58,7 +60,11 @@ export default function WorkoutScreen() {
     setLoading(true);
     try {
       const workoutData = await healthService.getRunningWorkouts();
-      setWorkouts(workoutData);
+      // Sort workouts by start date, newest first
+      const sortedWorkouts = workoutData.sort((a, b) => 
+        new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
+      );
+      setWorkouts(sortedWorkouts);
       setStats(healthService.getWorkoutStats(workoutData));
       setError("");
     } catch (err: any) {
@@ -79,9 +85,14 @@ export default function WorkoutScreen() {
     });
   };
 
-  // Format distance to display in km with 2 decimal places
-  const formatDistance = (meters: number) => {
-    return (meters / 1000).toFixed(2) + " km";
+  // Format distance based on current unit preference
+  const formatDistance = (miles: number) => {
+    if (unit === 'km') {
+      const km = healthService.convertDistance(miles, 'miles', 'km');
+      return km.toFixed(2) + " km";
+    } else {
+      return miles.toFixed(2) + " mi";
+    }
   };
 
   // Format duration to display in HH:MM:SS format
@@ -126,9 +137,13 @@ export default function WorkoutScreen() {
             </Text>
             <Text size="md" bold>
               {item.distance > 0
-                ? healthService.formatPace(
-                    item.duration / 60 / (item.distance / 1000)
-                  )
+                ? (() => {
+                    const distance = unit === 'km' 
+                      ? healthService.convertDistance(item.distance, 'miles', 'km')
+                      : item.distance;
+                    const pace = item.duration / 60 / distance;
+                    return healthService.formatPace(pace, unit);
+                  })()
                 : "--:--"}
             </Text>
           </VStack>
@@ -224,7 +239,13 @@ export default function WorkoutScreen() {
                       Avg Pace
                     </Text>
                     <Text size="lg" bold>
-                      {healthService.formatPace(stats.avgPace)}
+                      {(() => {
+                        if (unit === 'km') {
+                          const avgPaceKm = stats.avgPace / 1.609344;
+                          return healthService.formatPace(avgPaceKm, 'km');
+                        }
+                        return healthService.formatPace(stats.avgPace, 'miles');
+                      })()}
                     </Text>
                   </VStack>
 
@@ -233,7 +254,13 @@ export default function WorkoutScreen() {
                       Fastest Pace
                     </Text>
                     <Text size="lg" bold>
-                      {healthService.formatPace(stats.fastestPace)}
+                      {(() => {
+                        if (unit === 'km') {
+                          const fastestPaceKm = stats.fastestPace / 1.609344;
+                          return healthService.formatPace(fastestPaceKm, 'km');
+                        }
+                        return healthService.formatPace(stats.fastestPace, 'miles');
+                      })()}
                     </Text>
                   </VStack>
                 </HStack>
