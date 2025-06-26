@@ -119,20 +119,18 @@ class HealthService {
             .filter((workout: any) => {
               // Filter for running activities only
               const activityName = (workout.activityName || "").toLowerCase();
-              return (
-                activityName.includes("running") || activityName.includes("run")
-              );
+              return activityName.includes("running") || activityName.includes("run");
             })
             .map((workout: any) => {
               // Validate and normalize numeric values
               const distanceInMiles = this.validateNumber(workout.distance, 0);
               const duration = this.validateNumber(workout.duration, 0);
               const calories = this.validateNumber(workout.calories, 0);
-
+              
               // Parse dates properly - HealthKit uses 'start' and 'end' field names
               const startDate = this.parseHealthKitDate(workout.start);
               const endDate = this.parseHealthKitDate(workout.end);
-
+              
               return {
                 id: workout.id || String(startDate),
                 startDate,
@@ -202,7 +200,8 @@ class HealthService {
     );
 
     // Calculate average pace (min/mile) from total duration and distance
-    const avgPace = totalDistance > 0 ? totalDuration / 60 / totalDistance : 0;
+    const avgPace =
+      totalDistance > 0 ? totalDuration / 60 / totalDistance : 0;
 
     // Find the longest workout by distance
     const longestDistance = Math.max(...workouts.map((w) => w.distance));
@@ -245,10 +244,10 @@ class HealthService {
    */
   private parseHealthKitDate(dateValue: any): string {
     if (!dateValue) return new Date().toISOString();
-
+    
     // Try parsing as-is first
     let date = new Date(dateValue);
-
+    
     // If invalid, try treating as timestamp
     if (isNaN(date.getTime())) {
       const timestamp = Number(dateValue);
@@ -256,13 +255,13 @@ class HealthService {
         date = new Date(timestamp);
       }
     }
-
+    
     // If still invalid, return current date
     if (isNaN(date.getTime())) {
-      console.warn("Invalid date from HealthKit:", dateValue);
+      console.warn('Invalid date from HealthKit:', dateValue);
       return new Date().toISOString();
     }
-
+    
     return date.toISOString();
   }
 
@@ -272,19 +271,15 @@ class HealthService {
    * @param fromUnit Current unit ('miles' or 'km')
    * @param toUnit Target unit ('miles' or 'km')
    */
-  convertDistance(
-    distance: number,
-    fromUnit: "miles" | "km",
-    toUnit: "miles" | "km"
-  ): number {
+  convertDistance(distance: number, fromUnit: 'miles' | 'km', toUnit: 'miles' | 'km'): number {
     if (fromUnit === toUnit) return distance;
-
-    if (fromUnit === "miles" && toUnit === "km") {
+    
+    if (fromUnit === 'miles' && toUnit === 'km') {
       return distance * 1.609344;
-    } else if (fromUnit === "km" && toUnit === "miles") {
+    } else if (fromUnit === 'km' && toUnit === 'miles') {
       return distance / 1.609344;
     }
-
+    
     return distance;
   }
 
@@ -293,7 +288,7 @@ class HealthService {
    * @param pace Pace in minutes per unit
    * @param unit The unit ('miles' or 'km')
    */
-  formatPace(pace: number, unit: "miles" | "km" = "miles"): string {
+  formatPace(pace: number, unit: 'miles' | 'km' = 'miles'): string {
     if (!pace || pace === 0 || pace === Infinity) return "--:--";
 
     const minutes = Math.floor(pace);

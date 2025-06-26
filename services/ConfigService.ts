@@ -9,7 +9,7 @@ const ConfigService = {
    * API and backend configuration
    */
   api: {
-    backendUrl: process.env.REACT_APP_BACKEND_URL || "http://192.168.4.32:5001",
+    backendUrl: process.env.REACT_APP_BACKEND_URL || "http://10.0.0.51:5001" || "http://192.168.4.32:5001"
   },
 
   /**

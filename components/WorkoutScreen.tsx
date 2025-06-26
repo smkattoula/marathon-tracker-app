@@ -13,21 +13,16 @@ import { Button, ButtonText } from "@/components/ui/button";
 import { Divider } from "@/components/ui/divider";
 import { VStack } from "@/components/ui/vstack";
 import { HStack } from "@/components/ui/hstack";
-import healthService, { WorkoutData } from "@/services/HealthService";
+import { useUnit } from "@/contexts/UnitContext";
+import healthService, { WorkoutData, WorkoutStats } from "@/services/HealthService";
 import ThemeAwareScreen from "./ui/theme-aware-screen";
 
-interface WorkoutStats {
-  totalWorkouts: number;
-  totalDistanceMi: number;
-  avgPaceSecPerMi: number;
-  fastestPaceSecPerMi: number;
-  longestDistanceMi: number;
-  totalCalories: number;
-}
+
 
 export default function WorkoutScreen() {
   const [workouts, setWorkouts] = useState<WorkoutData[]>([]);
   const [stats, setStats] = useState<WorkoutStats | null>(null);
+  const { unit } = useUnit();
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
   const [healthAvailable, setHealthAvailable] = useState<boolean>(false);
@@ -56,11 +51,6 @@ export default function WorkoutScreen() {
     })();
   }, []);
 
-  useEffect(() => {
-    if (workouts.length > 0) {
-      setStats(calculateStats(workouts));
-    }
-  }, [workouts]);
 
   const loadWorkouts = useCallback(async () => {
     setLoading(true);
@@ -90,122 +80,83 @@ export default function WorkoutScreen() {
     return `${m}:${s.toString().padStart(2, "0")}`;
   };
 
-  const formatDistance = (distanceMi: number): string => {
-    return (distanceMi ?? 0).toFixed(2) + " mi";
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   };
 
-  const formatDuration = (seconds: number): string => {
-    const hrs = Math.floor(seconds / 3600);
-    const mins = Math.floor((seconds % 3600) / 60);
-    const secs = Math.floor(seconds % 60);
-    if (hrs > 0) {
-      return `${hrs}:${mins.toString().padStart(2, "0")}:${secs
+  // Format distance based on current unit preference
+  const formatDistance = (miles: number) => {
+    if (unit === 'km') {
+      const km = healthService.convertDistance(miles, 'miles', 'km');
+      return km.toFixed(2) + " km";
+    } else {
+      return miles.toFixed(2) + " mi";
+    }
+  };
+
+  // Format duration to display in HH:MM:SS format
+  const formatDuration = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const remainingSeconds = Math.floor(seconds % 60);
+
+    if (hours > 0) {
+      return `${hours}:${minutes.toString().padStart(2, "0")}:${remainingSeconds
         .toString()
         .padStart(2, "0")}`;
     }
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
   };
 
-  function calculateStats(data: WorkoutData[]): WorkoutStats {
-    let totalWorkouts = data.length;
-    let totalDistanceMi = 0;
-    let totalDurationSec = 0;
-    let longestDistanceMi = 0;
-    let totalCalories = 0;
-    let fastestPaceSecPerMi = Number.POSITIVE_INFINITY;
-
-    data.forEach((w) => {
-      const distMi = w.distance;
-      const durSec = w.duration;
-      const cals = w.calories ?? 0;
-
-      totalDistanceMi += distMi;
-      totalDurationSec += durSec;
-      totalCalories += cals;
-
-      if (distMi > longestDistanceMi) {
-        longestDistanceMi = distMi;
-      }
-
-      if (distMi > 0) {
-        const runPaceSecPerMi = durSec / distMi;
-        if (runPaceSecPerMi < fastestPaceSecPerMi) {
-          fastestPaceSecPerMi = runPaceSecPerMi;
-        }
-      }
-    });
-
-    if (!isFinite(fastestPaceSecPerMi)) {
-      fastestPaceSecPerMi = 0;
-    }
-
-    const avgPaceSecPerMi =
-      totalDistanceMi > 0 ? totalDurationSec / totalDistanceMi : 0;
-
-    return {
-      totalWorkouts,
-      totalDistanceMi,
-      avgPaceSecPerMi,
-      fastestPaceSecPerMi,
-      longestDistanceMi,
-      totalCalories,
-    };
-  }
-
-  const renderWorkoutItem = ({ item }: { item: WorkoutData }) => {
-    const rawMi = item.distance ?? 0;
-    const rawSec = item.duration ?? 0;
-
-    const singlePaceSecPerMi = rawMi > 0 ? rawSec / rawMi : 0;
-    const formattedPace = formatPace(singlePaceSecPerMi);
-
-    return (
-      <Card style={styles.workoutCard}>
-        <VStack space="md">
-          <Heading size="sm">
-            {item.startDate
-              ? new Date(item.startDate).toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                  year: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })
-              : "Unknown Date"}
-          </Heading>
-
-          <HStack style={{ justifyContent: "space-between" }}>
-            <VStack>
-              <Text size="xs" style={{ opacity: 0.7 }}>
-                Distance
-              </Text>
-              <Text size="md" bold>
-                {formatDistance(rawMi)}
-              </Text>
-            </VStack>
-
-            <VStack>
-              <Text size="xs" style={{ opacity: 0.7 }}>
-                Duration
-              </Text>
-              <Text size="md" bold>
-                {formatDuration(rawSec)}
-              </Text>
-            </VStack>
-
-            <VStack>
-              <Text size="xs" style={{ opacity: 0.7 }}>
-                Pace
-              </Text>
-              <Text size="md" bold>
-                {rawMi > 0 ? formattedPace : "--:--"}
-              </Text>
-            </VStack>
-          </HStack>
-        </VStack>
-      </Card>
-    );
-  };
+  // Render each workout item
+  const renderWorkoutItem = ({ item }: { item: WorkoutData }) => (
+    <Card style={styles.workoutCard}>
+      <VStack space="md">
+        <Heading size="sm">{formatDate(item.startDate)}</Heading>
+        <HStack space="lg" style={styles.workoutStatsContainer}>
+          <VStack>
+            <Text size="xs" style={{ opacity: 0.7 }}>
+              Distance
+            </Text>
+            <Text size="md" bold>
+              {formatDistance(item.distance)}
+            </Text>
+          </VStack>
+          <VStack>
+            <Text size="xs" style={{ opacity: 0.7 }}>
+              Duration
+            </Text>
+            <Text size="md" bold>
+              {formatDuration(item.duration)}
+            </Text>
+          </VStack>
+          <VStack>
+            <Text size="xs" style={{ opacity: 0.7 }}>
+              Pace
+            </Text>
+            <Text size="md" bold>
+              {item.distance > 0
+                ? (() => {
+                    const distance = unit === 'km' 
+                      ? healthService.convertDistance(item.distance, 'miles', 'km')
+                      : item.distance;
+                    const pace = item.duration / 60 / distance;
+                    return healthService.formatPace(pace, unit);
+                  })()
+                : "--:--"}
+            </Text>
+          </VStack>
+        </HStack>
+      </VStack>
+    </Card>
+  );
 
   if (!healthAvailable) {
     return (
@@ -278,7 +229,7 @@ export default function WorkoutScreen() {
                       Total Distance
                     </Text>
                     <Text size="lg" bold>
-                      {(stats.totalDistanceMi ?? 0).toFixed(2)} mi
+                      {formatDistance(stats.totalDistance)}
                     </Text>
                   </VStack>
                 </HStack>
@@ -289,7 +240,13 @@ export default function WorkoutScreen() {
                       Avg Pace
                     </Text>
                     <Text size="lg" bold>
-                      {formatPace(stats.avgPaceSecPerMi ?? 0)}
+                      {(() => {
+                        if (unit === 'km') {
+                          const avgPaceKm = stats.avgPace / 1.609344;
+                          return healthService.formatPace(avgPaceKm, 'km');
+                        }
+                        return healthService.formatPace(stats.avgPace, 'miles');
+                      })()}
                     </Text>
                   </VStack>
 
@@ -298,7 +255,13 @@ export default function WorkoutScreen() {
                       Fastest Pace
                     </Text>
                     <Text size="lg" bold>
-                      {formatPace(stats.fastestPaceSecPerMi ?? 0)}
+                      {(() => {
+                        if (unit === 'km') {
+                          const fastestPaceKm = stats.fastestPace / 1.609344;
+                          return healthService.formatPace(fastestPaceKm, 'km');
+                        }
+                        return healthService.formatPace(stats.fastestPace, 'miles');
+                      })()}
                     </Text>
                   </VStack>
                 </HStack>
@@ -309,7 +272,7 @@ export default function WorkoutScreen() {
                       Longest Run
                     </Text>
                     <Text size="lg" bold>
-                      {(stats.longestDistanceMi ?? 0).toFixed(2)} mi
+                      {formatDistance(stats.longestDistance)}
                     </Text>
                   </VStack>
 

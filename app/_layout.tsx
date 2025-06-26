@@ -4,6 +4,7 @@ import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import { useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ModeType } from "@/components/ui/gluestack-ui-provider/types";
+import { UnitProvider } from "@/contexts/UnitContext";
 
 // Create a context for theme that can be used throughout the app
 import { createContext } from "react";
@@ -43,37 +44,40 @@ export default function RootLayout() {
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      <GluestackUIProvider mode={theme}>
-        <Stack
-          screenOptions={{
-            headerShown: true,
-            title: "",
-            headerStyle: {
-              backgroundColor: theme === "dark" ? "#181818" : "#f2f2f2",
-            },
-            headerTintColor: theme === "dark" ? "#f2f2f2" : "#000000",
-          }}
-        >
-          <Stack.Screen name="index" />
-          <Stack.Screen name="login" />
-          <Stack.Screen name="home" />
-          <Stack.Screen
-            name="profile"
-            options={{
-              title: "User Profile",
-              headerTitleAlign: "center",
+    <UnitProvider>
+      <ThemeContext.Provider value={{ theme, toggleTheme }}>
+        <GluestackUIProvider mode={theme}>
+        
+          <Stack
+            screenOptions={{
+              headerShown: true,
+              title: "",
+              headerStyle: {
+                backgroundColor: theme === "dark" ? "#181818" : "#f2f2f2",
+              },
+              headerTintColor: theme === "dark" ? "#f2f2f2" : "#000000",
             }}
-          />
-          <Stack.Screen
-            name="settings"
-            options={{
-              title: "Settings",
-              headerTitleAlign: "center",
-            }}
-          />
-        </Stack>
-      </GluestackUIProvider>
-    </ThemeContext.Provider>
+          >
+              <Stack.Screen name="index" />
+              <Stack.Screen name="login" />
+              <Stack.Screen name="home" />
+              <Stack.Screen
+                name="profile"
+                options={{
+                  title: "User Profile",
+                  headerTitleAlign: "center",
+                }}
+              />
+              <Stack.Screen
+                name="settings"
+                options={{
+                  title: "Settings",
+                  headerTitleAlign: "center",
+                }}
+              />
+            </Stack>
+        </GluestackUIProvider>
+      </ThemeContext.Provider>
+    </UnitProvider>
   );
 }

@@ -12,7 +12,10 @@
     "newArchEnabled": false,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.smkattoula.MarathonTrackerApp"
+      "bundleIdentifier": "com.ccondon894.MarathonTrackerApp",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
