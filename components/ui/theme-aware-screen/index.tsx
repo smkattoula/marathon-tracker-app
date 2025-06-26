@@ -12,7 +12,7 @@ type ThemeAwareScreenProps = {
 export default function ThemeAwareScreen({
   children,
   style,
-  lightBackgroundColor = "#FFFFFF",
+  lightBackgroundColor = "#f2f2f2",
   darkBackgroundColor = "#181818",
 }: ThemeAwareScreenProps) {
   const { theme } = useContext(ThemeContext);

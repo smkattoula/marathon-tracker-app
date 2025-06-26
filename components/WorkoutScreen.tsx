@@ -1,12 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   StyleSheet,
   FlatList,
   ActivityIndicator,
-  Platform,
   ScrollView,
-  TouchableOpacity,
 } from "react-native";
 import { Text } from "@/components/ui/text";
 import { Heading } from "@/components/ui/heading";
@@ -15,21 +13,19 @@ import { Button, ButtonText } from "@/components/ui/button";
 import { Divider } from "@/components/ui/divider";
 import { VStack } from "@/components/ui/vstack";
 import { HStack } from "@/components/ui/hstack";
-import ThemeAwareScreen from "@/components/ui/theme-aware-screen";
-import healthService, {
-  WorkoutData,
-  WorkoutStats,
-} from "@/services/HealthService";
 import { useUnit } from "@/contexts/UnitContext";
-import { router } from "expo-router";
+import healthService, { WorkoutData, WorkoutStats } from "@/services/HealthService";
+import ThemeAwareScreen from "./ui/theme-aware-screen";
+
+
 
 export default function WorkoutScreen() {
   const [workouts, setWorkouts] = useState<WorkoutData[]>([]);
   const [stats, setStats] = useState<WorkoutStats | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [healthAvailable, setHealthAvailable] = useState(false);
   const { unit } = useUnit();
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string>("");
+  const [healthAvailable, setHealthAvailable] = useState<boolean>(false);
 
   useEffect(() => {
     const isAvailable = healthService.isHealthDataAvailable();
@@ -41,37 +37,47 @@ export default function WorkoutScreen() {
       return;
     }
 
-    const initializeHealthKit = async () => {
+    (async () => {
       try {
         await healthService.initialize();
-        loadWorkouts();
-      } catch (error) {
+        await loadWorkouts();
+      } catch (e) {
+        console.error(e);
         setError(
           "Failed to initialize HealthKit. Please check your permissions."
         );
         setLoading(false);
       }
-    };
-
-    initializeHealthKit();
+    })();
   }, []);
 
-  const loadWorkouts = async () => {
+
+  const loadWorkouts = useCallback(async () => {
     setLoading(true);
     try {
       const workoutData = await healthService.getRunningWorkouts();
-      // Sort workouts by start date, newest first
-      const sortedWorkouts = workoutData.sort((a, b) => 
-        new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
+      const sortedWorkouts = workoutData.sort(
+        (a, b) =>
+          new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
       );
       setWorkouts(sortedWorkouts);
-      setStats(healthService.getWorkoutStats(workoutData));
       setError("");
     } catch (err: any) {
+      console.error(err);
       setError(err.message || "Failed to load workouts");
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  const formatPace = (paceSecondsPerMi: number): string => {
+    if (!paceSecondsPerMi || isNaN(paceSecondsPerMi) || paceSecondsPerMi <= 0) {
+      return "--:--";
+    }
+    const totalSec = Math.round(paceSecondsPerMi);
+    const m = Math.floor(totalSec / 60);
+    const s = totalSec % 60;
+    return `${m}:${s.toString().padStart(2, "0")}`;
   };
 
   const formatDate = (dateString: string) => {
@@ -154,19 +160,17 @@ export default function WorkoutScreen() {
 
   if (!healthAvailable) {
     return (
-      <ThemeAwareScreen>
-        <View style={styles.container}>
-          <Card style={styles.errorCard}>
-            <Text size="lg" bold>
-              HealthKit Not Available
-            </Text>
-            <Text>
-              HealthKit is only available on iOS devices. This feature cannot be
-              used on your current device.
-            </Text>
-          </Card>
-        </View>
-      </ThemeAwareScreen>
+      <View style={styles.container}>
+        <Card style={styles.errorCard}>
+          <Text size="lg" bold>
+            HealthKit Not Available
+          </Text>
+          <Text>
+            HealthKit is only available on iOS devices. This feature cannot be
+            used on your current device.
+          </Text>
+        </Card>
+      </View>
     );
   }
 
@@ -183,19 +187,17 @@ export default function WorkoutScreen() {
 
   if (error) {
     return (
-      <ThemeAwareScreen>
-        <View style={styles.container}>
-          <Card style={styles.errorCard}>
-            <Text size="lg" bold>
-              Error Loading Workouts
-            </Text>
-            <Text>{error}</Text>
-            <Button onPress={loadWorkouts} style={{ marginTop: 20 }}>
-              <ButtonText>Retry</ButtonText>
-            </Button>
-          </Card>
-        </View>
-      </ThemeAwareScreen>
+      <View style={styles.container}>
+        <Card style={styles.errorCard}>
+          <Text size="lg" bold>
+            Error Loading Workouts
+          </Text>
+          <Text>{error}</Text>
+          <Button onPress={loadWorkouts} style={{ marginTop: 20 }}>
+            <ButtonText>Retry</ButtonText>
+          </Button>
+        </Card>
+      </View>
     );
   }
 
@@ -212,14 +214,13 @@ export default function WorkoutScreen() {
               <VStack space="md">
                 <Heading size="md">Summary Statistics</Heading>
                 <Divider />
-
                 <HStack space="xl" style={styles.statsRow}>
                   <VStack style={styles.statItem}>
                     <Text size="xs" style={{ opacity: 0.7 }}>
                       Total Runs
                     </Text>
                     <Text size="lg" bold>
-                      {stats.totalWorkouts}
+                      {stats.totalWorkouts ?? 0}
                     </Text>
                   </VStack>
 
@@ -280,14 +281,13 @@ export default function WorkoutScreen() {
                       Total Calories
                     </Text>
                     <Text size="lg" bold>
-                      {Math.round(stats.totalCalories)} kcal
+                      {Math.round(stats.totalCalories ?? 0)} kcal
                     </Text>
                   </VStack>
                 </HStack>
               </VStack>
             </Card>
           )}
-
           <View style={styles.workoutsContainer}>
             <Heading size="md" style={styles.sectionTitle}>
               Recent Workouts

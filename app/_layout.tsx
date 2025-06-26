@@ -47,34 +47,35 @@ export default function RootLayout() {
     <UnitProvider>
       <ThemeContext.Provider value={{ theme, toggleTheme }}>
         <GluestackUIProvider mode={theme}>
+        
           <Stack
             screenOptions={{
               headerShown: true,
               title: "",
               headerStyle: {
-                backgroundColor: theme === "dark" ? "#181818" : "#FFFFFF",
+                backgroundColor: theme === "dark" ? "#181818" : "#f2f2f2",
               },
-              headerTintColor: theme === "dark" ? "#FFFFFF" : "#000000",
+              headerTintColor: theme === "dark" ? "#f2f2f2" : "#000000",
             }}
           >
-            <Stack.Screen name="index" />
-            <Stack.Screen name="login" />
-            <Stack.Screen name="home" />
-            <Stack.Screen
-              name="profile"
-              options={{
-                title: "User Profile",
-                headerTitleAlign: "center",
-              }}
-            />
-            <Stack.Screen
-              name="settings"
-              options={{
-                title: "Settings",
-                headerTitleAlign: "center",
-              }}
-            />
-          </Stack>
+              <Stack.Screen name="index" />
+              <Stack.Screen name="login" />
+              <Stack.Screen name="home" />
+              <Stack.Screen
+                name="profile"
+                options={{
+                  title: "User Profile",
+                  headerTitleAlign: "center",
+                }}
+              />
+              <Stack.Screen
+                name="settings"
+                options={{
+                  title: "Settings",
+                  headerTitleAlign: "center",
+                }}
+              />
+            </Stack>
         </GluestackUIProvider>
       </ThemeContext.Provider>
     </UnitProvider>

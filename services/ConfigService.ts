@@ -1,4 +1,4 @@
-import Constants from 'expo-constants';
+import Constants from "expo-constants";
 
 /**
  * A service for centralized config management
@@ -9,7 +9,7 @@ const ConfigService = {
    * API and backend configuration
    */
   api: {
-    backendUrl: process.env.REACT_APP_BACKEND_URL || "http://10.0.0.51:5001",
+    backendUrl: process.env.REACT_APP_BACKEND_URL || "http://10.0.0.51:5001" || "http://192.168.4.32:5001"
   },
 
   /**
@@ -20,9 +20,15 @@ const ConfigService = {
      * Google OAuth configuration
      */
     google: {
-      webClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID || "469869191343-3q7dgv3c0qaf2ptngfgdvanvkbqv18nc.apps.googleusercontent.com",
-      iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID || "469869191343-cr2flp6klveh6n0sphn4b3craf1os4t8.apps.googleusercontent.com",
-      redirectUri: `https://auth.expo.io/@${Constants.expoConfig?.owner || 'unknown'}/${Constants.expoConfig?.slug || 'unknown'}`,
+      webClientId:
+        process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID ||
+        "469869191343-3q7dgv3c0qaf2ptngfgdvanvkbqv18nc.apps.googleusercontent.com",
+      iosClientId:
+        process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID ||
+        "469869191343-cr2flp6klveh6n0sphn4b3craf1os4t8.apps.googleusercontent.com",
+      redirectUri: `https://auth.expo.io/@${
+        Constants.expoConfig?.owner || "unknown"
+      }/${Constants.expoConfig?.slug || "unknown"}`,
     },
   },
 
@@ -30,9 +36,11 @@ const ConfigService = {
    * Application configuration
    */
   app: {
-    bundleId: process.env.EXPO_PUBLIC_APP_BUNDLE_ID || "com.condor94.MarathonTrackerApp",
-    owner: Constants.expoConfig?.owner || 'unknown',
-    appSlug: Constants.expoConfig?.slug || 'unknown',
+    bundleId:
+      process.env.EXPO_PUBLIC_APP_BUNDLE_ID ||
+      "com.smkattoula.MarathonTrackerApp",
+    owner: Constants.expoConfig?.owner || "unknown",
+    appSlug: Constants.expoConfig?.slug || "unknown",
   },
 
   /**
@@ -40,9 +48,9 @@ const ConfigService = {
    */
   getAuthConfig() {
     return {
-      google: this.auth.google
+      google: this.auth.google,
     };
-  }
+  },
 };
 
 export default ConfigService;
